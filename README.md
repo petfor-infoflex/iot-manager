@@ -25,7 +25,7 @@ En Windows-applikation för att hantera lokala IoT-enheter med ett modernt GUI. 
 
 Ladda ner den senaste versionen direkt:
 
-**[⬇️ Ladda ner IoTDeviceManager.exe](https://github.com/petofr-infoflex/iot-device-manager/releases/latest/download/IoTDeviceManager.exe)**
+**[⬇️ Ladda ner IoTDeviceManager.exe](https://github.com/petfor-infoflex/iot-manager/releases/latest/download/IoTDeviceManager.exe)**
 
 Dubbelklicka för att köra - ingen installation krävs!
 
@@ -42,8 +42,8 @@ Dubbelklicka för att köra - ingen installation krävs!
 
 1. Klona repositoryt:
 ```bash
-git clone https://github.com/petofr-infoflex/iot-device-manager.git
-cd iot-device-manager
+git clone https://github.com/petfor-infoflex/iot-manager.git
+cd iot-manager
 ```
 
 2. Skapa en virtuell miljö (rekommenderas):

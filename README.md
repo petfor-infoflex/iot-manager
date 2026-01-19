@@ -19,11 +19,19 @@ En Windows-applikation för att hantera lokala IoT-enheter med ett modernt GUI. 
 - **Färgväljare** för RGB-lampor med snabbval och anpassade färger
 - **Lokal kontroll** - all kommunikation sker direkt på ditt nätverk
 
-## Skärmdumpar
+## Nedladdning
 
-*Kommer snart*
+### Färdig .exe (enklast)
 
-## Installation
+Ladda ner den senaste versionen direkt:
+
+**[⬇️ Ladda ner IoTDeviceManager.exe](https://github.com/ditt-användarnamn/iot-device-manager/releases/latest/download/IoTDeviceManager.exe)**
+
+Dubbelklicka för att köra - ingen installation krävs!
+
+---
+
+## Installation från källkod
 
 ### Krav
 
@@ -138,6 +146,17 @@ src/iot_manager/
 | pywizlight | WiZ-kontroll |
 | tapo | TP-Link Tapo-kontroll |
 | tinytuya | Tuya-kontroll |
+
+## Bygg från källkod
+
+Om du vill bygga .exe-filen själv:
+
+```bash
+# Kör build-scriptet (skapar venv, installerar beroenden, bygger exe)
+build.bat
+```
+
+Exe-filen skapas i `dist/IoTDeviceManager.exe`.
 
 ## Bidra
 

@@ -1,163 +1,169 @@
 # IoT Device Manager
 
-En Windows-applikation för att hantera lokala IoT-enheter med ett modernt GUI. Inspirerad av Google Home men fokuserad på lokal kontroll utan molntjänster.
+A Windows application for managing local IoT devices with a modern GUI. Inspired by Google Home but focused on local control without cloud services.
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
 ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-## Funktioner
+## Features
 
-- **Automatisk enhetsupptäckt** via mDNS/Zeroconf
-- **Stöd för flera enhetstyper:**
-  - Google Home / Chromecast-högtalare (volymkontroll, mediainformation)
-  - WiZ / Philips smarta lampor (på/av, ljusstyrka, RGB-färg)
-  - TP-Link Tapo-lampor (på/av, ljusstyrka, färg)
-  - Tuya/Deltaco-lampor (på/av, ljusstyrka, RGB-färg)
-- **Modernt GUI** med mörkt/ljust tema (CustomTkinter)
-- **System tray-stöd** - minimera till aktivitetsfältet
-- **Färgväljare** för RGB-lampor med snabbval och anpassade färger
-- **Lokal kontroll** - all kommunikation sker direkt på ditt nätverk
+- **Automatic device discovery** via mDNS/Zeroconf
+- **Support for multiple device types:**
+  - Google Home / Chromecast speakers (volume control, media information)
+  - WiZ / Philips smart lights (on/off, brightness, RGB color)
+  - TP-Link Tapo lights (on/off, brightness, color)
+  - Tuya/Deltaco lights (on/off, brightness, RGB color)
+- **Modern GUI** with dark/light theme (CustomTkinter)
+- **System tray support** - minimize to taskbar
+- **Color picker** for RGB lights with quick presets and custom colors
+- **Local control** - all communication happens directly on your network
+- **Multi-language support** (English and Swedish)
 
-## Nedladdning
+## Download
 
-### Färdig .exe (enklast)
+### Ready-to-use .exe (easiest)
 
-Ladda ner den senaste versionen direkt:
+Download the latest version directly:
 
-**[⬇️ Ladda ner IoTDeviceManager.exe](https://github.com/petfor-infoflex/iot-manager/releases/latest/download/IoTDeviceManager.exe)**
+**[Download IoTDeviceManager.exe](https://github.com/petfor-infoflex/iot-manager/releases/latest/download/IoTDeviceManager.exe)**
 
-Dubbelklicka för att köra - ingen installation krävs!
+Double-click to run - no installation required!
 
 ---
 
-## Installation från källkod
+## Installation from source
 
-### Krav
+### Requirements
 
-- Python 3.10 eller senare
+- Python 3.10 or later
 - Windows 10/11
 
-### Steg
+### Steps
 
-1. Klona repositoryt:
+1. Clone the repository:
 ```bash
 git clone https://github.com/petfor-infoflex/iot-manager.git
 cd iot-manager
 ```
 
-2. Skapa en virtuell miljö (rekommenderas):
+2. Create a virtual environment (recommended):
 ```bash
 python -m venv venv
 venv\Scripts\activate
 ```
 
-3. Installera beroenden:
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Kör applikationen:
+4. Run the application:
 ```bash
 python -m iot_manager
 ```
 
-## Konfiguration
+## Configuration
 
-### WiZ-lampor
-WiZ-lampor upptäcks automatiskt på nätverket. Inga ytterligare inställningar krävs.
+### WiZ lights
+WiZ lights are automatically discovered on the network. No additional settings required.
 
 ### Chromecast/Google Home
-Chromecast-enheter upptäcks automatiskt via mDNS. Se till att din dator och enheterna är på samma nätverk.
+Chromecast devices are automatically discovered via mDNS. Make sure your computer and devices are on the same network.
 
 ### TP-Link Tapo
-1. Öppna inställningar (kugghjulet i appen)
-2. Gå till fliken "Tapo"
-3. Ange dina Tapo-kontouppgifter (e-post och lösenord)
-4. Lägg till IP-adresser för dina Tapo-enheter
+1. Open settings (gear icon in the app)
+2. Go to the "Tapo" tab
+3. Enter your Tapo account credentials (email and password)
+4. Add IP addresses for your Tapo devices
 
 ### Tuya/Deltaco
-Tuya-enheter kräver en "Local Key" som hämtas från Tuya IoT Platform:
+Tuya devices require a "Local Key" obtained from Tuya IoT Platform:
 
-1. Skapa ett konto på [Tuya IoT Platform](https://iot.tuya.com/)
-2. Skapa ett Cloud Project och länka din app (SmartLife/Deltaco Smart Home)
-3. Hämta Device ID och Local Key för dina enheter
-4. Lägg till enheterna i inställningarna med IP, Device ID och Local Key
+1. Create an account at [Tuya IoT Platform](https://iot.tuya.com/)
+2. Create a Cloud Project and link your app (SmartLife/Deltaco Smart Home)
+3. Get the Device ID and Local Key for your devices
+4. Add devices in settings with IP, Device ID, and Local Key
 
-## Användning
+## Usage
 
-### Huvudfönster
-- Enheter visas som kort med namn, status och kontroller
-- Klicka på strömbrytaren för att slå på/av
-- Dra i ljusstyrkereglaget för att justera
-- Klicka på färgknappen för att öppna färgväljaren (RGB-lampor)
+### Main window
+- Devices are displayed as cards with name, status, and controls
+- Click the power button to turn on/off
+- Drag the brightness slider to adjust
+- Click the color button to open the color picker (RGB lights)
 
 ### System Tray
-- Klicka på X för att minimera till aktivitetsfältet
-- Högerklicka på ikonen för snabbmeny
-- Dubbelklicka för att återställa fönstret
+- Click X to minimize to taskbar
+- Right-click on icon for quick menu
+- Double-click to restore window
 
-### Inställningar
-- **Tema:** Välj mellan mörkt, ljust eller systemtema
-- **Auto-upptäckt:** Slå på/av automatisk enhetsupptäckt
-- **Pollningsintervall:** Hur ofta enhetsstatusen uppdateras
+### Settings
+- **Theme:** Choose between dark, light, or system theme
+- **Auto-discovery:** Enable/disable automatic device discovery
+- **Polling interval:** How often device status is updated
+- **Language:** Select English or Swedish (requires restart)
 
-## Projektstruktur
+## Project Structure
 
 ```
 src/iot_manager/
 ├── __init__.py
 ├── __main__.py          # Entry point
-├── app.py               # Huvudapplikation
+├── app.py               # Main application
 ├── core/
-│   └── events.py        # Event-system
+│   └── events.py        # Event system
 ├── devices/
-│   ├── base.py          # Abstrakt enhetsklass
-│   ├── registry.py      # Enhetsregister
-│   ├── chromecast.py    # Chromecast-stöd
-│   ├── wiz.py           # WiZ-stöd
-│   ├── tapo_light.py    # Tapo-stöd
-│   └── tuya_light.py    # Tuya-stöd
+│   ├── base.py          # Abstract device class
+│   ├── registry.py      # Device registry
+│   ├── chromecast.py    # Chromecast support
+│   ├── wiz.py           # WiZ support
+│   ├── tapo_light.py    # Tapo support
+│   └── tuya_light.py    # Tuya support
 ├── discovery/
-│   ├── mdns.py          # mDNS-discovery
-│   └── service.py       # Discovery-orkestrator
+│   ├── mdns.py          # mDNS discovery
+│   └── service.py       # Discovery orchestrator
 ├── gui/
-│   ├── main_window.py   # Huvudfönster
+│   ├── main_window.py   # Main window
 │   ├── settings_dialog.py
 │   ├── system_tray.py
 │   └── components/
 │       ├── device_card.py
 │       └── device_list.py
+├── i18n/
+│   ├── __init__.py      # Translation system
+│   ├── en.json          # English translations
+│   └── sv.json          # Swedish translations
 ├── storage/
-│   └── settings.py      # Inställningshantering
+│   └── settings.py      # Settings management
 └── utils/
-    └── async_helpers.py # Async/threading-brygga
+    └── async_helpers.py # Async/threading bridge
 ```
 
-## Beroenden
+## Dependencies
 
-| Paket | Användning |
-|-------|-----------|
-| customtkinter | Modernt GUI |
-| Pillow | Bildhantering |
+| Package | Usage |
+|---------|-------|
+| customtkinter | Modern GUI |
+| Pillow | Image handling |
 | pystray | System tray |
-| zeroconf | mDNS-discovery |
-| pychromecast | Chromecast-kontroll |
-| pywizlight | WiZ-kontroll |
-| tapo | TP-Link Tapo-kontroll |
-| tinytuya | Tuya-kontroll |
+| zeroconf | mDNS discovery |
+| pychromecast | Chromecast control |
+| pywizlight | WiZ control |
+| tapo | TP-Link Tapo control |
+| tinytuya | Tuya control |
 
-## Bidra
+## Contributing
 
-Bidrag är välkomna! Öppna gärna issues eller pull requests.
+Contributions are welcome! Feel free to open issues or pull requests.
 
-## Licens
+## License
 
-MIT License - se [LICENSE](LICENSE) för detaljer.
+MIT License - see [LICENSE](LICENSE) for details.
 
-## Tack till
+## Credits
 
-- [CustomTkinter](https://github.com/TomSchimansky/CustomTkinter) för det moderna GUI-ramverket
-- [pychromecast](https://github.com/home-assistant-libs/pychromecast) för Chromecast-integration
-- [pywizlight](https://github.com/sbidy/pywizlight) för WiZ-lampstöd
-- [tinytuya](https://github.com/jasonacox/tinytuya) för Tuya-protokollstöd
+- [CustomTkinter](https://github.com/TomSchimansky/CustomTkinter) for the modern GUI framework
+- [pychromecast](https://github.com/home-assistant-libs/pychromecast) for Chromecast integration
+- [pywizlight](https://github.com/sbidy/pywizlight) for WiZ light support
+- [tinytuya](https://github.com/jasonacox/tinytuya) for Tuya protocol support

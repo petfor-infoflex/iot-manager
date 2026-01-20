@@ -4,6 +4,8 @@ import customtkinter as ctk
 from typing import Callable, Optional
 import logging
 
+from ...i18n import _
+
 logger = logging.getLogger(__name__)
 
 
@@ -37,7 +39,7 @@ class RoomManagerDialog(ctk.CTkToplevel):
 
     def _setup_window(self) -> None:
         """Configure the dialog window."""
-        self.title("Hantera rum")
+        self.title(_("manage_rooms"))
         self.geometry("350x450")
         self.resizable(False, False)
 
@@ -56,7 +58,7 @@ class RoomManagerDialog(ctk.CTkToplevel):
         # Header
         header = ctk.CTkLabel(
             self,
-            text="Hantera rum",
+            text=_("manage_rooms"),
             font=ctk.CTkFont(size=18, weight="bold"),
         )
         header.grid(row=0, column=0, pady=(20, 10), padx=20)
@@ -75,7 +77,7 @@ class RoomManagerDialog(ctk.CTkToplevel):
 
         self.new_room_entry = ctk.CTkEntry(
             add_frame,
-            placeholder_text="Nytt rumsnamn...",
+            placeholder_text=_("new_room_name"),
             height=35,
         )
         self.new_room_entry.grid(row=0, column=0, sticky="ew", padx=(0, 10))
@@ -95,7 +97,7 @@ class RoomManagerDialog(ctk.CTkToplevel):
         # Close button
         close_btn = ctk.CTkButton(
             self,
-            text="Stäng",
+            text=_("close"),
             width=100,
             command=self.destroy,
         )
@@ -110,7 +112,7 @@ class RoomManagerDialog(ctk.CTkToplevel):
         if not self.rooms:
             empty_label = ctk.CTkLabel(
                 self.room_list_frame,
-                text="Inga rum skapade ännu.\nLägg till ett rum nedan.",
+                text=_("no_rooms_created"),
                 text_color="gray",
             )
             empty_label.pack(pady=20)
@@ -233,7 +235,7 @@ class EditRoomDialog(ctk.CTkToplevel):
 
         self.result: Optional[str] = None
 
-        self.title("Redigera rum")
+        self.title(_("edit_room"))
         self.geometry("300x150")
         self.resizable(False, False)
 
@@ -250,7 +252,7 @@ class EditRoomDialog(ctk.CTkToplevel):
         # Name entry
         label = ctk.CTkLabel(
             self,
-            text="Rumsnamn:",
+            text=_("room_name"),
             font=ctk.CTkFont(size=13),
         )
         label.pack(pady=(30, 5))
@@ -267,7 +269,7 @@ class EditRoomDialog(ctk.CTkToplevel):
 
         cancel_btn = ctk.CTkButton(
             btn_frame,
-            text="Avbryt",
+            text=_("cancel"),
             width=80,
             fg_color="transparent",
             hover_color=("gray80", "gray30"),
@@ -277,7 +279,7 @@ class EditRoomDialog(ctk.CTkToplevel):
 
         save_btn = ctk.CTkButton(
             btn_frame,
-            text="Spara",
+            text=_("save"),
             width=80,
             command=self._save,
         )

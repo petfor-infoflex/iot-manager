@@ -6,6 +6,7 @@ import logging
 
 from .device_card import DeviceCard
 from ...devices.base import BaseDevice
+from ...i18n import _
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ class DeviceList(ctk.CTkScrollableFrame):
         # Empty state label
         self._empty_label = ctk.CTkLabel(
             self,
-            text="Inga enheter hittade\n\nSöker efter enheter på nätverket...",
+            text=_("no_devices_found"),
             font=ctk.CTkFont(size=14),
             text_color="gray",
         )

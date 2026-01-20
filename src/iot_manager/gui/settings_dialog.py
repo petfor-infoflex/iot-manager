@@ -5,6 +5,8 @@ from typing import Optional, Callable
 import logging
 import threading
 
+from ..i18n import _, get_available_languages, get_language
+
 logger = logging.getLogger(__name__)
 
 # Check if tinytuya is available
@@ -31,8 +33,8 @@ class SettingsDialog(ctk.CTkToplevel):
         self._on_save = on_save
         self._scanned_tuya_devices: list[dict] = []
 
-        self.title("Inställningar")
-        self.geometry("700x600")
+        self.title(_("settings_title"))
+        self.geometry("700x650")
         self.resizable(True, True)
 
         # Make modal
@@ -57,9 +59,9 @@ class SettingsDialog(ctk.CTkToplevel):
         self.tabview.pack(fill="both", expand=True, padx=10, pady=10)
 
         # Add tabs
-        self.tabview.add("Allmänt")
-        self.tabview.add("Tapo")
-        self.tabview.add("Tuya/Deltaco")
+        self.tabview.add(_("tab_general"))
+        self.tabview.add(_("tab_tapo"))
+        self.tabview.add(_("tab_tuya"))
 
         self._setup_general_tab()
         self._setup_tapo_tab()
@@ -71,7 +73,7 @@ class SettingsDialog(ctk.CTkToplevel):
 
         ctk.CTkButton(
             button_frame,
-            text="Avbryt",
+            text=_("cancel"),
             width=100,
             fg_color=("gray70", "gray30"),
             command=self.destroy,
@@ -79,14 +81,60 @@ class SettingsDialog(ctk.CTkToplevel):
 
         ctk.CTkButton(
             button_frame,
-            text="Spara",
+            text=_("save"),
             width=100,
             command=self._save_settings,
         ).pack(side="right", padx=5)
 
     def _setup_general_tab(self) -> None:
         """Set up the general settings tab."""
-        tab = self.tabview.tab("Allmänt")
+        tab = self.tabview.tab(_("tab_general"))
+
+        # Language selection
+        lang_frame = ctk.CTkFrame(tab)
+        lang_frame.pack(fill="x", padx=10, pady=10)
+
+        ctk.CTkLabel(
+            lang_frame,
+            text=_("language"),
+            font=ctk.CTkFont(size=14, weight="bold"),
+        ).pack(anchor="w", padx=10, pady=(10, 5))
+
+        # Get available languages and current language
+        available_langs = get_available_languages()
+        current_lang = self._settings.language or get_language()
+
+        # Find current language name
+        current_lang_name = "English"
+        for code, name in available_langs:
+            if code == current_lang:
+                current_lang_name = name
+                break
+
+        self.language_var = ctk.StringVar(value=current_lang_name)
+        lang_options = ctk.CTkFrame(lang_frame, fg_color="transparent")
+        lang_options.pack(fill="x", padx=10, pady=5)
+
+        # Create language dropdown
+        lang_names = [name for code, name in available_langs]
+        self.language_dropdown = ctk.CTkOptionMenu(
+            lang_options,
+            variable=self.language_var,
+            values=lang_names,
+            width=200,
+        )
+        self.language_dropdown.pack(side="left", padx=(0, 10))
+
+        # Restart note
+        ctk.CTkLabel(
+            lang_options,
+            text=_("language_restart_note"),
+            font=ctk.CTkFont(size=11),
+            text_color="gray",
+        ).pack(side="left")
+
+        # Store language mapping for save
+        self._lang_map = {name: code for code, name in available_langs}
 
         # Theme selection
         theme_frame = ctk.CTkFrame(tab)
@@ -94,7 +142,7 @@ class SettingsDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(
             theme_frame,
-            text="Tema",
+            text=_("theme"),
             font=ctk.CTkFont(size=14, weight="bold"),
         ).pack(anchor="w", padx=10, pady=(10, 5))
 
@@ -102,10 +150,10 @@ class SettingsDialog(ctk.CTkToplevel):
         theme_options = ctk.CTkFrame(theme_frame, fg_color="transparent")
         theme_options.pack(fill="x", padx=10, pady=5)
 
-        for value, label in [("dark", "Mörkt"), ("light", "Ljust"), ("system", "System")]:
+        for value, label_key in [("dark", "theme_dark"), ("light", "theme_light"), ("system", "theme_system")]:
             ctk.CTkRadioButton(
                 theme_options,
-                text=label,
+                text=_(label_key),
                 variable=self.theme_var,
                 value=value,
             ).pack(side="left", padx=10)
@@ -116,14 +164,14 @@ class SettingsDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(
             discover_frame,
-            text="Upptäckt",
+            text=_("discovery"),
             font=ctk.CTkFont(size=14, weight="bold"),
         ).pack(anchor="w", padx=10, pady=(10, 5))
 
         self.auto_discover_var = ctk.BooleanVar(value=self._settings.auto_discover)
         ctk.CTkCheckBox(
             discover_frame,
-            text="Upptäck enheter automatiskt vid start",
+            text=_("auto_discover"),
             variable=self.auto_discover_var,
         ).pack(anchor="w", padx=10, pady=5)
 
@@ -131,13 +179,13 @@ class SettingsDialog(ctk.CTkToplevel):
         self.start_minimized_var = ctk.BooleanVar(value=self._settings.start_minimized)
         ctk.CTkCheckBox(
             discover_frame,
-            text="Starta minimerad i systemfältet",
+            text=_("start_minimized"),
             variable=self.start_minimized_var,
         ).pack(anchor="w", padx=10, pady=5)
 
     def _setup_tapo_tab(self) -> None:
         """Set up the Tapo settings tab."""
-        tab = self.tabview.tab("Tapo")
+        tab = self.tabview.tab(_("tab_tapo"))
 
         # Info label
         info_frame = ctk.CTkFrame(tab)
@@ -145,7 +193,7 @@ class SettingsDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(
             info_frame,
-            text="TP-Link Tapo-lampor kräver dina molnuppgifter för att styras lokalt.",
+            text=_("tapo_info"),
             font=ctk.CTkFont(size=12),
             wraplength=500,
         ).pack(padx=10, pady=10)
@@ -156,14 +204,14 @@ class SettingsDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(
             cred_frame,
-            text="Tapo-konto",
+            text=_("tapo_account"),
             font=ctk.CTkFont(size=14, weight="bold"),
         ).pack(anchor="w", padx=10, pady=(10, 5))
 
         # Username
         user_frame = ctk.CTkFrame(cred_frame, fg_color="transparent")
         user_frame.pack(fill="x", padx=10, pady=5)
-        ctk.CTkLabel(user_frame, text="E-post:", width=80).pack(side="left")
+        ctk.CTkLabel(user_frame, text=_("email"), width=80).pack(side="left")
         self.tapo_username_entry = ctk.CTkEntry(user_frame, width=300)
         self.tapo_username_entry.pack(side="left", padx=5)
         self.tapo_username_entry.insert(0, self._settings.tapo_username)
@@ -171,7 +219,7 @@ class SettingsDialog(ctk.CTkToplevel):
         # Password
         pass_frame = ctk.CTkFrame(cred_frame, fg_color="transparent")
         pass_frame.pack(fill="x", padx=10, pady=5)
-        ctk.CTkLabel(pass_frame, text="Lösenord:", width=80).pack(side="left")
+        ctk.CTkLabel(pass_frame, text=_("password"), width=80).pack(side="left")
         self.tapo_password_entry = ctk.CTkEntry(pass_frame, width=300, show="*")
         self.tapo_password_entry.pack(side="left", padx=5)
         self.tapo_password_entry.insert(0, self._settings.tapo_password)
@@ -182,7 +230,7 @@ class SettingsDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(
             ip_frame,
-            text="Tapo-enhets IP-adresser (en per rad)",
+            text=_("tapo_device_ips"),
             font=ctk.CTkFont(size=14, weight="bold"),
         ).pack(anchor="w", padx=10, pady=(10, 5))
 
@@ -193,7 +241,7 @@ class SettingsDialog(ctk.CTkToplevel):
 
     def _setup_tuya_tab(self) -> None:
         """Set up the Tuya/Deltaco settings tab."""
-        tab = self.tabview.tab("Tuya/Deltaco")
+        tab = self.tabview.tab(_("tab_tuya"))
 
         # Info label
         info_frame = ctk.CTkFrame(tab)
@@ -201,9 +249,7 @@ class SettingsDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(
             info_frame,
-            text="Tuya/Deltaco-enheter kräver Device ID och Local Key.\n"
-                 "Skanna nätverket för att hitta enheter, sedan måste du\n"
-                 "hämta Local Key från Tuya IoT Platform.",
+            text=_("tuya_info"),
             font=ctk.CTkFont(size=12),
             wraplength=500,
             justify="left",
@@ -215,7 +261,7 @@ class SettingsDialog(ctk.CTkToplevel):
 
         self.scan_button = ctk.CTkButton(
             scan_frame,
-            text="Skanna nätverk efter Tuya-enheter",
+            text=_("scan_network"),
             command=self._scan_tuya_devices,
         )
         self.scan_button.pack(side="left", padx=10, pady=10)
@@ -229,7 +275,7 @@ class SettingsDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(
             self.scanned_frame,
-            text="Hittade enheter (klicka för att lägga till):",
+            text=_("found_devices_click"),
             font=ctk.CTkFont(size=12, weight="bold"),
         ).pack(anchor="w", padx=10, pady=5)
 
@@ -245,13 +291,13 @@ class SettingsDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(
             header_frame,
-            text="Konfigurerade Tuya-enheter",
+            text=_("configured_tuya_devices"),
             font=ctk.CTkFont(size=14, weight="bold"),
         ).pack(side="left")
 
         ctk.CTkButton(
             header_frame,
-            text="+ Lägg till manuellt",
+            text=_("add_manually"),
             width=140,
             command=self._add_tuya_device_dialog,
         ).pack(side="right")
@@ -266,11 +312,11 @@ class SettingsDialog(ctk.CTkToplevel):
     def _scan_tuya_devices(self) -> None:
         """Scan for Tuya devices on the network."""
         if not TINYTUYA_AVAILABLE:
-            self.scan_status.configure(text="tinytuya ej installerat!")
+            self.scan_status.configure(text=_("tinytuya_not_installed"))
             return
 
         self.scan_button.configure(state="disabled")
-        self.scan_status.configure(text="Skannar...")
+        self.scan_status.configure(text=_("scanning"))
 
         def do_scan():
             try:
@@ -281,7 +327,7 @@ class SettingsDialog(ctk.CTkToplevel):
                 self.after(0, self._update_scanned_list)
             except Exception as e:
                 logger.error(f"Error scanning for Tuya devices: {e}")
-                self.after(0, lambda: self.scan_status.configure(text=f"Fel: {e}"))
+                self.after(0, lambda: self.scan_status.configure(text=f"Error: {e}"))
             finally:
                 self.after(0, lambda: self.scan_button.configure(state="normal"))
 
@@ -295,15 +341,15 @@ class SettingsDialog(ctk.CTkToplevel):
             widget.destroy()
 
         if not self._scanned_tuya_devices:
-            self.scan_status.configure(text="Inga enheter hittades")
+            self.scan_status.configure(text=_("no_devices_found_short"))
             ctk.CTkLabel(
                 self.scanned_list,
-                text="Inga Tuya-enheter hittades på nätverket",
+                text=_("no_tuya_devices_network"),
                 text_color="gray",
             ).pack(pady=10)
             return
 
-        self.scan_status.configure(text=f"Hittade {len(self._scanned_tuya_devices)} enheter")
+        self.scan_status.configure(text=_("found_devices", count=len(self._scanned_tuya_devices)))
 
         for device in self._scanned_tuya_devices:
             device_frame = ctk.CTkFrame(self.scanned_list)
@@ -321,7 +367,7 @@ class SettingsDialog(ctk.CTkToplevel):
 
             ctk.CTkButton(
                 device_frame,
-                text="Lägg till",
+                text=_("add"),
                 width=80,
                 height=28,
                 command=lambda d=device: self._add_scanned_device(d),
@@ -356,7 +402,7 @@ class SettingsDialog(ctk.CTkToplevel):
     ) -> None:
         """Show dialog to add/edit a Tuya device."""
         dialog = ctk.CTkToplevel(self)
-        dialog.title("Lägg till Tuya-enhet" if edit_index is None else "Redigera Tuya-enhet")
+        dialog.title(_("add_tuya_device") if edit_index is None else _("edit_tuya_device"))
         dialog.geometry("450x350")
         dialog.transient(self)
         dialog.grab_set()
@@ -372,31 +418,31 @@ class SettingsDialog(ctk.CTkToplevel):
         form_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
         # Name
-        ctk.CTkLabel(form_frame, text="Namn:").grid(row=0, column=0, sticky="w", pady=5)
+        ctk.CTkLabel(form_frame, text=_("name")).grid(row=0, column=0, sticky="w", pady=5)
         name_entry = ctk.CTkEntry(form_frame, width=300)
         name_entry.grid(row=0, column=1, pady=5, padx=10)
         name_entry.insert(0, name)
 
         # IP
-        ctk.CTkLabel(form_frame, text="IP-adress:").grid(row=1, column=0, sticky="w", pady=5)
+        ctk.CTkLabel(form_frame, text=_("ip_address")).grid(row=1, column=0, sticky="w", pady=5)
         ip_entry = ctk.CTkEntry(form_frame, width=300)
         ip_entry.grid(row=1, column=1, pady=5, padx=10)
         ip_entry.insert(0, ip)
 
         # Device ID
-        ctk.CTkLabel(form_frame, text="Device ID:").grid(row=2, column=0, sticky="w", pady=5)
+        ctk.CTkLabel(form_frame, text=_("device_id")).grid(row=2, column=0, sticky="w", pady=5)
         id_entry = ctk.CTkEntry(form_frame, width=300)
         id_entry.grid(row=2, column=1, pady=5, padx=10)
         id_entry.insert(0, device_id)
 
         # Local Key
-        ctk.CTkLabel(form_frame, text="Local Key:").grid(row=3, column=0, sticky="w", pady=5)
+        ctk.CTkLabel(form_frame, text=_("local_key")).grid(row=3, column=0, sticky="w", pady=5)
         key_entry = ctk.CTkEntry(form_frame, width=300)
         key_entry.grid(row=3, column=1, pady=5, padx=10)
         key_entry.insert(0, local_key)
 
         # Version
-        ctk.CTkLabel(form_frame, text="Version:").grid(row=4, column=0, sticky="w", pady=5)
+        ctk.CTkLabel(form_frame, text=_("version")).grid(row=4, column=0, sticky="w", pady=5)
         version_entry = ctk.CTkEntry(form_frame, width=300)
         version_entry.grid(row=4, column=1, pady=5, padx=10)
         version_entry.insert(0, version)
@@ -404,7 +450,7 @@ class SettingsDialog(ctk.CTkToplevel):
         # Help text
         ctk.CTkLabel(
             form_frame,
-            text="Local Key hämtas från Tuya IoT Platform.\nKör 'python -m tinytuya wizard' för hjälp.",
+            text=_("local_key_help"),
             font=ctk.CTkFont(size=11),
             text_color="gray",
         ).grid(row=5, column=0, columnspan=2, pady=10)
@@ -439,7 +485,7 @@ class SettingsDialog(ctk.CTkToplevel):
 
         ctk.CTkButton(
             btn_frame,
-            text="Avbryt",
+            text=_("cancel"),
             width=100,
             fg_color=("gray70", "gray30"),
             command=dialog.destroy,
@@ -447,7 +493,7 @@ class SettingsDialog(ctk.CTkToplevel):
 
         ctk.CTkButton(
             btn_frame,
-            text="Spara",
+            text=_("save"),
             width=100,
             command=save_device,
         ).pack(side="right", padx=5)
@@ -461,7 +507,7 @@ class SettingsDialog(ctk.CTkToplevel):
         if not self._settings.tuya_devices:
             ctk.CTkLabel(
                 self.tuya_devices_frame,
-                text="Inga Tuya-enheter konfigurerade",
+                text=_("no_tuya_configured"),
                 text_color="gray",
             ).pack(pady=20)
             return
@@ -470,20 +516,20 @@ class SettingsDialog(ctk.CTkToplevel):
             device_frame = ctk.CTkFrame(self.tuya_devices_frame)
             device_frame.pack(fill="x", pady=2)
 
-            name = device.get("name", "Okänd")
+            name = device.get("name", _("unknown"))
             ip = device.get("ip", "?")
-            has_key = "Ja" if device.get("key") else "Nej"
+            has_key = _("yes") if device.get("key") else _("no")
 
             ctk.CTkLabel(
                 device_frame,
-                text=f"{name}  |  {ip}  |  Key: {has_key}",
+                text=f"{name}  |  {ip}  |  {_('key')}: {has_key}",
                 font=ctk.CTkFont(size=12),
             ).pack(side="left", padx=10, pady=8)
 
             # Delete button
             ctk.CTkButton(
                 device_frame,
-                text="Ta bort",
+                text=_("remove"),
                 width=70,
                 height=28,
                 fg_color=("gray70", "gray30"),
@@ -494,7 +540,7 @@ class SettingsDialog(ctk.CTkToplevel):
             # Edit button
             ctk.CTkButton(
                 device_frame,
-                text="Redigera",
+                text=_("edit"),
                 width=70,
                 height=28,
                 command=lambda idx=i, d=device: self._show_tuya_device_dialog(
@@ -517,6 +563,10 @@ class SettingsDialog(ctk.CTkToplevel):
 
     def _save_settings(self) -> None:
         """Save all settings and close dialog."""
+        # Language setting
+        selected_lang_name = self.language_var.get()
+        self._settings.language = self._lang_map.get(selected_lang_name, "en")
+
         # General settings
         self._settings.theme = self.theme_var.get()
         self._settings.auto_discover = self.auto_discover_var.get()

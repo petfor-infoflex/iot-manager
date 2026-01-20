@@ -14,6 +14,9 @@ logger = logging.getLogger(__name__)
 class AppSettings:
     """Application settings with defaults."""
 
+    # Language (empty = first run, will prompt user)
+    language: str = ""  # "en" or "sv"
+
     # Appearance
     theme: str = "dark"  # "dark", "light", or "system"
 

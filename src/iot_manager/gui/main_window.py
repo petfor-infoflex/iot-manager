@@ -9,6 +9,7 @@ from .dialogs.device_settings import DeviceSettingsDialog
 from .dialogs.room_manager import RoomManagerDialog
 from .settings_dialog import SettingsDialog
 from ..devices.base import BaseDevice
+from ..i18n import _
 
 if TYPE_CHECKING:
     from ..app import IoTManagerApp
@@ -49,7 +50,7 @@ class MainWindow(ctk.CTk):
 
     def _setup_window(self) -> None:
         """Configure the window."""
-        self.title("IoT Device Manager")
+        self.title(_("app_title"))
 
         # Set window size from settings
         settings = self.app.settings.load()
@@ -106,18 +107,18 @@ class MainWindow(ctk.CTk):
         # Title
         title = ctk.CTkLabel(
             header,
-            text="IoT Device Manager",
+            text=_("app_title"),
             font=ctk.CTkFont(size=18, weight="bold"),
         )
         title.grid(row=0, column=0, padx=15, pady=10)
 
         # Filter dropdown
-        self._current_filter = "Alla"
-        self.filter_var = ctk.StringVar(value="Alla")
+        self._current_filter = _("filter_all")
+        self.filter_var = ctk.StringVar(value=_("filter_all"))
         self.filter_dropdown = ctk.CTkOptionMenu(
             header,
             variable=self.filter_var,
-            values=["Alla"],
+            values=[_("filter_all")],
             command=self._handle_filter_change,
             width=150,
         )
@@ -159,7 +160,7 @@ class MainWindow(ctk.CTk):
         # Status label
         self.status_label = ctk.CTkLabel(
             footer,
-            text="Söker efter enheter...",
+            text=_("searching_devices"),
             font=ctk.CTkFont(size=11),
             text_color="gray",
         )
@@ -168,7 +169,7 @@ class MainWindow(ctk.CTk):
         # Device count
         self.count_label = ctk.CTkLabel(
             footer,
-            text="0 enheter",
+            text=_("device_count_many", count=0),
             font=ctk.CTkFont(size=11),
             text_color="gray",
         )
@@ -429,7 +430,7 @@ class MainWindow(ctk.CTk):
             settings: The updated settings
         """
         logger.info("Settings saved, some changes may require restart")
-        self.set_status("Inställningar sparade")
+        self.set_status(_("settings_saved"))
 
     def _load_device_config(self) -> None:
         """Load device configuration from storage."""
@@ -488,7 +489,7 @@ class MainWindow(ctk.CTk):
 
     def _update_filter_options(self) -> None:
         """Update the filter dropdown with available options."""
-        options = ["Alla", "Grupper"]
+        options = [_("filter_all"), _("filter_groups")]
 
         # Add rooms if any exist
         if self._rooms:
@@ -518,9 +519,9 @@ class MainWindow(ctk.CTk):
             room = self._device_rooms.get(device_id)
             should_show = True
 
-            if filter_value == "Alla":
+            if filter_value == _("filter_all"):
                 should_show = True
-            elif filter_value == "Grupper":
+            elif filter_value == _("filter_groups"):
                 # Show only speaker groups
                 should_show = hasattr(device, 'is_group') and device.is_group
             else:
@@ -546,7 +547,7 @@ class MainWindow(ctk.CTk):
     def _refresh_devices(self) -> None:
         """Refresh device discovery."""
         logger.info("Refreshing device discovery")
-        self.set_status("Söker efter enheter...")
+        self.set_status(_("searching_devices"))
 
         async def do_refresh():
             await self.app.discovery.stop()
@@ -598,7 +599,10 @@ class MainWindow(ctk.CTk):
     def _update_device_count(self) -> None:
         """Update the device count label."""
         count = len(self.device_list)
-        text = f"{count} enhet{'er' if count != 1 else ''}"
+        if count == 1:
+            text = _("device_count_one")
+        else:
+            text = _("device_count_many", count=count)
         self.count_label.configure(text=text)
 
     def minimize_to_tray(self) -> None:

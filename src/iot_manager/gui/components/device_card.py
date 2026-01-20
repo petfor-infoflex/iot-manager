@@ -5,6 +5,7 @@ from typing import Callable, Optional
 import logging
 
 from ...devices.base import BaseDevice, DeviceCapability, DeviceType, PlaybackState
+from ...i18n import _
 
 logger = logging.getLogger(__name__)
 
@@ -173,7 +174,7 @@ class DeviceCard(ctk.CTkFrame):
 
         self.settings_button = ctk.CTkButton(
             settings_frame,
-            text="\U00002699 Inställningar",  # Gear icon
+            text="\U00002699 " + _("settings"),
             height=28,
             font=ctk.CTkFont(size=11),
             fg_color="transparent",
@@ -222,22 +223,22 @@ class DeviceCard(ctk.CTkFrame):
         )
         color_label.pack(side="left", padx=(0, 10))
 
-        # Predefined colors as buttons
+        # Predefined colors as buttons (names not shown, just RGB values)
         self._color_buttons = []
         colors = [
-            ("Vit", (255, 255, 255)),
-            ("Varmvit", (255, 200, 150)),
-            ("Röd", (255, 0, 0)),
-            ("Grön", (0, 255, 0)),
-            ("Blå", (0, 0, 255)),
-            ("Gul", (255, 255, 0)),
-            ("Cyan", (0, 255, 255)),
-            ("Magenta", (255, 0, 255)),
-            ("Orange", (255, 165, 0)),
-            ("Lila", (128, 0, 128)),
+            ((255, 255, 255)),    # White
+            ((255, 200, 150)),    # Warm white
+            ((255, 0, 0)),        # Red
+            ((0, 255, 0)),        # Green
+            ((0, 0, 255)),        # Blue
+            ((255, 255, 0)),      # Yellow
+            ((0, 255, 255)),      # Cyan
+            ((255, 0, 255)),      # Magenta
+            ((255, 165, 0)),      # Orange
+            ((128, 0, 128)),      # Purple
         ]
 
-        for name, rgb in colors:
+        for rgb in colors:
             hex_color = f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}"
             btn = ctk.CTkButton(
                 color_frame,
@@ -366,7 +367,7 @@ class DeviceCard(ctk.CTkFrame):
 
         # Show if it's a speaker group
         if hasattr(self.device, 'is_group') and self.device.is_group:
-            parts.append("\U0001F465 Grupp")  # People icon for group
+            parts.append("\U0001F465 " + _("device_type_group"))  # People icon for group
 
         # Show room if assigned
         if self.room:
@@ -377,15 +378,15 @@ class DeviceCard(ctk.CTkFrame):
 
         if self.device.device_type != DeviceType.UNKNOWN:
             type_names = {
-                DeviceType.LIGHT: "Lampa",
-                DeviceType.SWITCH: "Strömbrytare",
-                DeviceType.PLUG: "Smartkontakt",
-                DeviceType.SENSOR: "Sensor",
-                DeviceType.THERMOSTAT: "Termostat",
-                DeviceType.SPEAKER: "Högtalare",
-                DeviceType.CAMERA: "Kamera",
+                DeviceType.LIGHT: _("device_type_light"),
+                DeviceType.SWITCH: _("device_type_switch"),
+                DeviceType.PLUG: _("device_type_plug"),
+                DeviceType.SENSOR: _("device_type_sensor"),
+                DeviceType.THERMOSTAT: _("device_type_thermostat"),
+                DeviceType.SPEAKER: _("device_type_speaker"),
+                DeviceType.CAMERA: _("device_type_camera"),
             }
-            # Don't show "Högtalare" if we already show "Grupp"
+            # Don't show speaker type if we already show group
             if not (hasattr(self.device, 'is_group') and self.device.is_group):
                 parts.append(type_names.get(self.device.device_type, ""))
 

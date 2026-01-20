@@ -4,6 +4,8 @@ import customtkinter as ctk
 from typing import TYPE_CHECKING, Optional, Callable
 import logging
 
+from ...i18n import _
+
 if TYPE_CHECKING:
     from ...devices.base import BaseDevice
 
@@ -49,7 +51,7 @@ class DeviceSettingsDialog(ctk.CTkToplevel):
 
     def _setup_window(self) -> None:
         """Configure the dialog window."""
-        self.title(f"Inställningar - {self.device.name}")
+        self.title(f"{_('settings')} - {self.device.name}")
         self.geometry("400x350")
         self.resizable(False, False)
 
@@ -67,7 +69,7 @@ class DeviceSettingsDialog(ctk.CTkToplevel):
         # Header
         header = ctk.CTkLabel(
             self,
-            text="Enhetsinställningar",
+            text=_("device_settings"),
             font=ctk.CTkFont(size=18, weight="bold"),
         )
         header.grid(row=0, column=0, pady=(20, 10), padx=20)
@@ -95,7 +97,7 @@ class DeviceSettingsDialog(ctk.CTkToplevel):
 
         name_label = ctk.CTkLabel(
             name_frame,
-            text="Namn:",
+            text=_("name"),
             font=ctk.CTkFont(size=13),
         )
         name_label.pack(anchor="w")
@@ -114,15 +116,17 @@ class DeviceSettingsDialog(ctk.CTkToplevel):
 
         room_label = ctk.CTkLabel(
             room_frame,
-            text="Rum:",
+            text=_("room"),
             font=ctk.CTkFont(size=13),
         )
         room_label.pack(anchor="w")
 
         # Room dropdown with option to add new
-        room_options = ["Inget rum"] + self.rooms + ["+ Lägg till nytt rum..."]
+        self._no_room_text = _("no_room")
+        self._add_room_text = _("add_new_room")
+        room_options = [self._no_room_text] + self.rooms + [self._add_room_text]
 
-        current_value = self.current_room if self.current_room else "Inget rum"
+        current_value = self.current_room if self.current_room else self._no_room_text
 
         self.room_var = ctk.StringVar(value=current_value)
         self.room_dropdown = ctk.CTkComboBox(
@@ -142,7 +146,7 @@ class DeviceSettingsDialog(ctk.CTkToplevel):
             self.new_room_frame,
             width=360,
             height=35,
-            placeholder_text="Ange namn på nytt rum...",
+            placeholder_text=_("enter_new_room_name"),
         )
         self.new_room_entry.pack(fill="x", pady=(5, 0))
 
@@ -154,7 +158,7 @@ class DeviceSettingsDialog(ctk.CTkToplevel):
         # Delete button
         delete_btn = ctk.CTkButton(
             button_frame,
-            text="Ta bort",
+            text=_("delete"),
             width=100,
             fg_color="transparent",
             hover_color=("gray80", "gray30"),
@@ -166,7 +170,7 @@ class DeviceSettingsDialog(ctk.CTkToplevel):
         # Cancel button
         cancel_btn = ctk.CTkButton(
             button_frame,
-            text="Avbryt",
+            text=_("cancel"),
             width=100,
             fg_color="transparent",
             hover_color=("gray80", "gray30"),
@@ -177,7 +181,7 @@ class DeviceSettingsDialog(ctk.CTkToplevel):
         # Save button
         save_btn = ctk.CTkButton(
             button_frame,
-            text="Spara",
+            text=_("save"),
             width=100,
             command=self._handle_save,
         )
@@ -185,7 +189,7 @@ class DeviceSettingsDialog(ctk.CTkToplevel):
 
     def _on_room_selected(self, value: str) -> None:
         """Handle room selection change."""
-        if value == "+ Lägg till nytt rum...":
+        if value == self._add_room_text:
             self.new_room_frame.pack(fill="x", pady=(5, 0))
             self.new_room_entry.focus()
         else:
@@ -203,12 +207,12 @@ class DeviceSettingsDialog(ctk.CTkToplevel):
         # Get room
         room = self.room_var.get()
 
-        if room == "+ Lägg till nytt rum...":
+        if room == self._add_room_text:
             room = self.new_room_entry.get().strip()
             if not room:
                 self.new_room_entry.configure(border_color="red")
                 return
-        elif room == "Inget rum":
+        elif room == self._no_room_text:
             room = None
 
         logger.info(f"Saving device settings: name={new_name}, room={room}")
@@ -223,8 +227,8 @@ class DeviceSettingsDialog(ctk.CTkToplevel):
         # Confirm deletion
         confirm = ConfirmDialog(
             self,
-            title="Ta bort enhet",
-            message=f"Är du säker på att du vill ta bort '{self.device.name}'?",
+            title=_("delete_device"),
+            message=_("delete_device_confirm", name=self.device.name),
         )
 
         if confirm.result:
@@ -271,7 +275,7 @@ class ConfirmDialog(ctk.CTkToplevel):
 
         cancel_btn = ctk.CTkButton(
             btn_frame,
-            text="Avbryt",
+            text=_("cancel"),
             width=80,
             fg_color="transparent",
             hover_color=("gray80", "gray30"),
@@ -281,7 +285,7 @@ class ConfirmDialog(ctk.CTkToplevel):
 
         confirm_btn = ctk.CTkButton(
             btn_frame,
-            text="Ta bort",
+            text=_("delete"),
             width=80,
             fg_color=("#cc0000", "#aa0000"),
             hover_color=("#990000", "#880000"),

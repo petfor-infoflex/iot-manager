@@ -16,6 +16,8 @@ from .devices.tapo_light import TapoDevice, TapoManager, TAPO_AVAILABLE
 from .devices.tuya_light import TuyaLightDevice, TuyaLightManager, TINYTUYA_AVAILABLE
 from .gui.main_window import MainWindow
 from .gui.system_tray import SystemTrayManager
+from .gui.dialogs.language_selector import LanguageSelectorDialog
+from .i18n import init_translator, _
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +84,29 @@ class IoTManagerApp:
         self.settings = SettingsManager()
         self.async_bridge = AsyncBridge()
 
+        # Load settings
+        settings = self.settings.load()
+
+        # Check if first run (no language set) - need to ask user
+        if not settings.language:
+            # Create a temporary root window for the language selector
+            temp_root = ctk.CTk()
+            temp_root.withdraw()  # Hide it
+
+            # Show language selector dialog
+            dialog = LanguageSelectorDialog(temp_root)
+            selected_lang = dialog.get_language()
+
+            # Save the selected language
+            settings.language = selected_lang
+            self.settings.save(settings)
+
+            # Destroy temp root
+            temp_root.destroy()
+
+        # Initialize translator with the selected language
+        init_translator(settings.language)
+
         # Device services
         self.registry = DeviceRegistry()
         self.discovery = DiscoveryService(self.event_bus)
@@ -99,9 +124,6 @@ class IoTManagerApp:
         self._wiz_manager = None
         if PYWIZLIGHT_AVAILABLE:
             self._wiz_manager = WizManager(self._handle_wiz_found)
-
-        # Load settings and configure appearance
-        settings = self.settings.load()
 
         # Tapo manager for TP-Link Tapo lights
         self._tapo_manager = None
@@ -298,7 +320,7 @@ class IoTManagerApp:
             device: The device to add
         """
         self.window.add_device(device)
-        self.window.set_status(f"Hittade: {device.name}")
+        self.window.set_status(_("found_device", name=device.name))
 
     def _on_device_state_changed(self, event: Event) -> None:
         """Handle device state change event.

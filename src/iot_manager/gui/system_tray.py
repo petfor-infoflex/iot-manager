@@ -4,6 +4,8 @@ import threading
 from typing import TYPE_CHECKING, Optional, Callable
 import logging
 
+from ..i18n import _
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -129,18 +131,18 @@ class SystemTrayManager:
             # Create menu
             menu = pystray.Menu(
                 pystray.MenuItem(
-                    "Visa fönster",
+                    _("tray_show_window"),
                     self._handle_show,
                     default=True,  # Double-click action
                 ),
                 pystray.Menu.SEPARATOR,
                 pystray.MenuItem(
-                    "Sök enheter",
+                    _("tray_search_devices"),
                     self._handle_refresh,
                 ),
                 pystray.Menu.SEPARATOR,
                 pystray.MenuItem(
-                    "Avsluta",
+                    _("tray_quit"),
                     self._handle_quit,
                 ),
             )
@@ -149,7 +151,7 @@ class SystemTrayManager:
             self._icon = pystray.Icon(
                 name="iot_manager",
                 icon=icon_image,
-                title="IoT Device Manager",
+                title=_("app_title"),
                 menu=menu,
             )
 

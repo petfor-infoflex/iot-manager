@@ -1,16 +1,16 @@
-"""IoT Device Manager - Huvudingång.
+"""IoT Device Manager - Main entry point.
 
-Kör denna fil för att starta appen:
+Run this file to start the app:
     python main.py
 
-Eller kör som modul:
+Or run as module:
     python -m src.iot_manager
 """
 
 import sys
 from pathlib import Path
 
-# Lägg till src i sökvägen
+# Add src to path
 src_path = Path(__file__).parent / "src"
 sys.path.insert(0, str(src_path))
 

@@ -25,6 +25,8 @@ class DeviceList(ctk.CTkScrollableFrame):
         on_pause: Optional[Callable[[BaseDevice], None]] = None,
         on_settings: Optional[Callable[[BaseDevice], None]] = None,
         on_tv_off: Optional[Callable[[BaseDevice], None]] = None,
+        on_seek: Optional[Callable[[BaseDevice, float], None]] = None,
+        on_seek_relative: Optional[Callable[[BaseDevice, float], None]] = None,
         **kwargs,
     ):
         """Initialize the device list.
@@ -39,6 +41,8 @@ class DeviceList(ctk.CTkScrollableFrame):
             on_pause: Callback when pause button is clicked
             on_settings: Callback when device settings is clicked
             on_tv_off: Callback when TV off button is clicked
+            on_seek: Callback when seek slider is released
+            on_seek_relative: Callback for relative seek
             **kwargs: Additional arguments for CTkScrollableFrame
         """
         super().__init__(parent, **kwargs)
@@ -51,6 +55,8 @@ class DeviceList(ctk.CTkScrollableFrame):
         self._on_pause = on_pause
         self._on_settings = on_settings
         self._on_tv_off = on_tv_off
+        self._on_seek = on_seek
+        self._on_seek_relative = on_seek_relative
 
         self._cards: dict[str, DeviceCard] = {}
         self._devices: dict[str, BaseDevice] = {}
@@ -107,6 +113,8 @@ class DeviceList(ctk.CTkScrollableFrame):
             on_pause=self._on_pause,
             on_settings=self._on_settings,
             on_tv_off=self._on_tv_off,
+            on_seek=self._on_seek,
+            on_seek_relative=self._on_seek_relative,
         )
 
         # Add to grid

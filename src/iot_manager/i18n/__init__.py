@@ -2,10 +2,22 @@
 
 import json
 import logging
+import sys
 from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+
+def _get_i18n_dir() -> Path:
+    """Get the i18n directory, handling both normal and frozen (PyInstaller) execution."""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        base_path = Path(sys._MEIPASS)
+        return base_path / "iot_manager" / "i18n"
+    else:
+        # Running as script
+        return Path(__file__).parent
 
 
 class Translator:
@@ -29,7 +41,7 @@ class Translator:
         cls._translations = {}
 
         # Load translation file
-        i18n_dir = Path(__file__).parent
+        i18n_dir = _get_i18n_dir()
         lang_file = i18n_dir / f"{language}.json"
 
         if lang_file.exists():

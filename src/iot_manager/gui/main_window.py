@@ -92,6 +92,8 @@ class MainWindow(ctk.CTk):
             on_pause=self._handle_pause,
             on_settings=self._handle_device_settings,
             on_tv_off=self._handle_tv_off,
+            on_seek=self._handle_seek,
+            on_seek_relative=self._handle_seek_relative,
         )
         self.device_list.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
 
@@ -320,6 +322,40 @@ class MainWindow(ctk.CTk):
                 logger.error(f"Failed to turn off TV via {device.name}: {e}")
 
         self.app.async_bridge.run_async(do_tv_off())
+
+    def _handle_seek(self, device: BaseDevice, position: float) -> None:
+        """Handle seek to absolute position.
+
+        Args:
+            device: The device to seek
+            position: Position in seconds
+        """
+        logger.info(f"Seek to {position:.1f}s on {device.name}")
+
+        async def do_seek():
+            try:
+                await device.seek(position)
+            except Exception as e:
+                logger.error(f"Failed to seek on {device.name}: {e}")
+
+        self.app.async_bridge.run_async(do_seek())
+
+    def _handle_seek_relative(self, device: BaseDevice, offset: float) -> None:
+        """Handle relative seek (skip forward/backward).
+
+        Args:
+            device: The device to seek
+            offset: Offset in seconds (positive = forward, negative = backward)
+        """
+        logger.info(f"Seek {offset:+.1f}s on {device.name}")
+
+        async def do_seek():
+            try:
+                await device.seek_relative(offset)
+            except Exception as e:
+                logger.error(f"Failed to seek on {device.name}: {e}")
+
+        self.app.async_bridge.run_async(do_seek())
 
     def _handle_device_settings(self, device: BaseDevice) -> None:
         """Handle device settings button click.

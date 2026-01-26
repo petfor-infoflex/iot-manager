@@ -38,6 +38,8 @@ class DeviceCard(ctk.CTkFrame):
         on_pause: Optional[Callable[[BaseDevice], None]] = None,
         on_settings: Optional[Callable[[BaseDevice], None]] = None,
         on_tv_off: Optional[Callable[[BaseDevice], None]] = None,
+        on_seek: Optional[Callable[[BaseDevice, float], None]] = None,
+        on_seek_relative: Optional[Callable[[BaseDevice, float], None]] = None,
         **kwargs,
     ):
         """Initialize the device card.
@@ -54,6 +56,8 @@ class DeviceCard(ctk.CTkFrame):
             on_pause: Callback when pause button is clicked
             on_settings: Callback when settings button is clicked
             on_tv_off: Callback when TV off button is clicked (Chromecast only)
+            on_seek: Callback when seek slider is released (position in seconds)
+            on_seek_relative: Callback for relative seek (+/- seconds)
             **kwargs: Additional arguments for CTkFrame
         """
         super().__init__(parent, **kwargs)
@@ -68,6 +72,8 @@ class DeviceCard(ctk.CTkFrame):
         self._on_pause = on_pause
         self._on_settings = on_settings
         self._on_tv_off = on_tv_off
+        self._on_seek = on_seek
+        self._on_seek_relative = on_seek_relative
         self._updating = False  # Prevent feedback loops
 
         self._setup_ui()
@@ -168,9 +174,13 @@ class DeviceCard(ctk.CTkFrame):
         if self.device.has_capability(DeviceCapability.PLAYBACK):
             self._setup_playback_controls()
 
+        # Seek controls (for media with duration)
+        if self.device.has_capability(DeviceCapability.SEEK):
+            self._setup_seek_controls()
+
         # Settings button row
         settings_frame = ctk.CTkFrame(self, fg_color="transparent")
-        settings_frame.grid(row=4, column=0, sticky="ew", padx=10, pady=(5, 10))
+        settings_frame.grid(row=6, column=0, sticky="ew", padx=10, pady=(5, 10))
 
         self.settings_button = ctk.CTkButton(
             settings_frame,
@@ -361,6 +371,121 @@ class DeviceCard(ctk.CTkFrame):
             if self._on_play:
                 self._on_play(self.device)
 
+    def _setup_seek_controls(self) -> None:
+        """Set up seek slider and skip buttons for media devices."""
+        # Container frame for all seek controls (hidden when no media)
+        self.seek_container = ctk.CTkFrame(self, fg_color="transparent")
+        self.seek_container.grid(row=4, column=0, sticky="ew", padx=0, pady=0)
+        self.seek_container.grid_columnconfigure(0, weight=1)
+
+        # Seek controls frame
+        seek_frame = ctk.CTkFrame(self.seek_container, fg_color="transparent")
+        seek_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=5)
+        seek_frame.grid_columnconfigure(1, weight=1)
+
+        # Rewind button (-10s)
+        self.rewind_button = ctk.CTkButton(
+            seek_frame,
+            text="\U000023EA",  # Rewind symbol
+            width=32,
+            height=28,
+            corner_radius=14,
+            fg_color=("gray70", "gray30"),
+            hover_color=("gray60", "gray40"),
+            command=lambda: self._handle_seek_relative(-10),
+        )
+        self.rewind_button.grid(row=0, column=0, padx=(0, 5))
+
+        # Progress slider
+        self.seek_slider = ctk.CTkSlider(
+            seek_frame,
+            from_=0,
+            to=100,
+            number_of_steps=100,
+            command=self._handle_seek_drag,
+        )
+        self.seek_slider.grid(row=0, column=1, sticky="ew")
+        self.seek_slider.set(0)
+
+        # Bind release event to actually send the seek
+        self.seek_slider.bind("<ButtonRelease-1>", self._handle_seek_release)
+
+        # Fast forward button (+10s)
+        self.forward_button = ctk.CTkButton(
+            seek_frame,
+            text="\U000023E9",  # Fast forward symbol
+            width=32,
+            height=28,
+            corner_radius=14,
+            fg_color=("gray70", "gray30"),
+            hover_color=("gray60", "gray40"),
+            command=lambda: self._handle_seek_relative(10),
+        )
+        self.forward_button.grid(row=0, column=2, padx=(5, 0))
+
+        # Time label row
+        time_frame = ctk.CTkFrame(self.seek_container, fg_color="transparent")
+        time_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 5))
+        time_frame.grid_columnconfigure(1, weight=1)
+
+        # Current position
+        self.position_label = ctk.CTkLabel(
+            time_frame,
+            text="0:00",
+            font=ctk.CTkFont(size=10),
+            text_color="gray",
+        )
+        self.position_label.grid(row=0, column=0, sticky="w")
+
+        # Duration
+        self.duration_label = ctk.CTkLabel(
+            time_frame,
+            text="0:00",
+            font=ctk.CTkFont(size=10),
+            text_color="gray",
+        )
+        self.duration_label.grid(row=0, column=2, sticky="e")
+
+        # Initially hide seek controls (will show when media is playing)
+        self.seek_container.grid_remove()
+
+    def _format_time(self, seconds: Optional[float]) -> str:
+        """Format seconds as MM:SS or H:MM:SS."""
+        if seconds is None or seconds < 0:
+            return "0:00"
+        seconds = int(seconds)
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        secs = seconds % 60
+        if hours > 0:
+            return f"{hours}:{minutes:02d}:{secs:02d}"
+        return f"{minutes}:{secs:02d}"
+
+    def _handle_seek_drag(self, value: float) -> None:
+        """Handle seek slider drag - update position label."""
+        if self._updating:
+            return
+
+        duration = self.device.state.media_duration
+        if duration and duration > 0:
+            position = (value / 100) * duration
+            self.position_label.configure(text=self._format_time(position))
+
+    def _handle_seek_release(self, event) -> None:
+        """Handle seek slider release - send seek to device."""
+        if self._updating:
+            return
+
+        duration = self.device.state.media_duration
+        if duration and duration > 0 and self._on_seek:
+            position = (self.seek_slider.get() / 100) * duration
+            self._on_seek(self.device, position)
+
+    def _handle_seek_relative(self, offset: float) -> None:
+        """Handle skip forward/backward buttons."""
+        if self._on_seek_relative:
+            self._on_seek_relative(self.device, offset)
+
     def _get_info_text(self) -> str:
         """Get the info text for the device."""
         parts = []
@@ -493,6 +618,29 @@ class DeviceCard(ctk.CTkFrame):
             r, g, b = state.rgb
             hex_color = f"#{r:02x}{g:02x}{b:02x}"
             self.color_indicator.configure(text_color=hex_color)
+
+        # Update seek controls
+        if hasattr(self, "seek_container"):
+            duration = state.media_duration
+            position = state.media_position
+
+            # Show/hide seek controls based on whether we have media with duration
+            has_media = duration and duration > 0
+            if has_media:
+                self.seek_container.grid()
+
+                # Update time labels
+                self.position_label.configure(text=self._format_time(position))
+                self.duration_label.configure(text=self._format_time(duration))
+
+                # Update slider position (as percentage)
+                if position is not None:
+                    percent = (position / duration) * 100
+                    self.seek_slider.set(percent)
+                else:
+                    self.seek_slider.set(0)
+            else:
+                self.seek_container.grid_remove()
 
         self._updating = False
 

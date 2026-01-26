@@ -34,6 +34,7 @@ class DeviceCapability(Enum):
     POWER_MONITORING = "power_monitoring"
     VOLUME = "volume"
     PLAYBACK = "playback"
+    SEEK = "seek"
 
 
 class PlaybackState(Enum):
@@ -62,6 +63,8 @@ class DeviceState:
     playback_state: PlaybackState = PlaybackState.UNKNOWN
     media_title: Optional[str] = None
     media_artist: Optional[str] = None
+    media_duration: Optional[float] = None  # Duration in seconds
+    media_position: Optional[float] = None  # Current position in seconds
     extra: dict = field(default_factory=dict)  # Device-specific data
 
 
@@ -313,6 +316,38 @@ class BaseDevice(ABC):
         """
         if not self.has_capability(DeviceCapability.PLAYBACK):
             raise NotImplementedError(f"{self.name} doesn't support playback")
+        return False
+
+    async def seek(self, position: float) -> bool:
+        """Seek to a position in the current media.
+
+        Args:
+            position: Position in seconds
+
+        Returns:
+            True if successful
+
+        Raises:
+            NotImplementedError: If device doesn't support seek
+        """
+        if not self.has_capability(DeviceCapability.SEEK):
+            raise NotImplementedError(f"{self.name} doesn't support seek")
+        return False
+
+    async def seek_relative(self, offset: float) -> bool:
+        """Seek relative to current position.
+
+        Args:
+            offset: Offset in seconds (positive = forward, negative = backward)
+
+        Returns:
+            True if successful
+
+        Raises:
+            NotImplementedError: If device doesn't support seek
+        """
+        if not self.has_capability(DeviceCapability.SEEK):
+            raise NotImplementedError(f"{self.name} doesn't support seek")
         return False
 
     def to_dict(self) -> dict[str, Any]:

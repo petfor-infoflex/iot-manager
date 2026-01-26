@@ -64,7 +64,11 @@ class ChromecastMediaListener(MediaStatusListener if PYCHROMECAST_AVAILABLE else
             self.device._state.media_title = status.title
             self.device._state.media_artist = status.artist
 
-            logger.debug(f"{self.device.name}: playback={player_state}, title={status.title}")
+            # Get duration and position
+            self.device._state.media_duration = status.duration
+            self.device._state.media_position = status.current_time
+
+            logger.debug(f"{self.device.name}: playback={player_state}, title={status.title}, pos={status.current_time}/{status.duration}")
 
             if self.device._on_state_changed:
                 self.device._on_state_changed(self.device)
@@ -141,7 +145,7 @@ class ChromecastDevice(BaseDevice):
 
     @property
     def capabilities(self) -> set[DeviceCapability]:
-        return {DeviceCapability.ON_OFF, DeviceCapability.VOLUME, DeviceCapability.PLAYBACK}
+        return {DeviceCapability.ON_OFF, DeviceCapability.VOLUME, DeviceCapability.PLAYBACK, DeviceCapability.SEEK}
 
     def set_state_callback(self, callback: Callable) -> None:
         self._on_state_changed = callback
@@ -271,6 +275,51 @@ class ChromecastDevice(BaseDevice):
             return True
         except Exception as e:
             logger.error(f"Failed to stop on {self.name}: {e}")
+            return False
+
+    async def seek(self, position: float) -> bool:
+        """Seek to a position in the current media.
+
+        Args:
+            position: Position in seconds
+
+        Returns:
+            True if successful
+        """
+        if not self._cast:
+            return False
+        try:
+            self._cast.media_controller.seek(position)
+            logger.info(f"Seek to {position:.1f}s on {self.name}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to seek on {self.name}: {e}")
+            return False
+
+    async def seek_relative(self, offset: float) -> bool:
+        """Seek relative to current position.
+
+        Args:
+            offset: Offset in seconds (positive = forward, negative = backward)
+
+        Returns:
+            True if successful
+        """
+        if not self._cast:
+            return False
+        try:
+            # Get current position
+            current_pos = self._state.media_position or 0
+            duration = self._state.media_duration or 0
+
+            # Calculate new position
+            new_pos = max(0, min(current_pos + offset, duration))
+
+            self._cast.media_controller.seek(new_pos)
+            logger.info(f"Seek {offset:+.1f}s to {new_pos:.1f}s on {self.name}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to seek on {self.name}: {e}")
             return False
 
     async def turn_off_tv(self) -> bool:
